@@ -20,7 +20,9 @@ This is itself a pickaxe play — sell the *output* to creators/agencies.
 
 | Tier | Format | Price | Margin |
 | --- | --- | --- | --- |
-| Audit | 1-time report | $500 | ~95% |
+| **Vertical Pack** | **Self-serve Markdown download (1 niche)** | **$99** | **~98%** |
+| Pack Refresh | Quarterly re-run of the same pack | $49 | ~98% |
+| Audit | 1-time custom report (your handle) | $500 | ~95% |
 | Strategy | 90-day plan + 2 revisions | $2,000 | ~90% |
 | Retainer | Monthly briefing | $299/mo | ~92% |
 | SaaS Pro | Self-serve, unlimited scans | $49/mo | ~85% |

@@ -37,16 +37,28 @@ In priority order — start where willingness-to-pay is highest:
 
 | Week | Goal | Action |
 | --- | --- | --- |
+| 1 | Ship the pack | Publish $99 Vertical Pack on Gumroad/Stripe; post about it on your main channel |
 | 1 | 10 conversations | DM 30 mid-size creators offering FREE audit in exchange for feedback |
-| 2 | 3 paid audits | Convert 3 of the free recipients to $500 paid follow-ups |
+| 2 | 3 pack sales + 3 paid audits | First proof of WTP at low ticket + convert 3 free-audit recipients to $500 |
 | 3 | 1 strategy | Upgrade the highest-engagement audit client to $2k strategy |
 | 4 | 5 retainers | Pitch monthly briefing to all 10; close 5 at $299/mo |
 
-If you hit week-4 numbers: $1,500 (audits) + $2,000 (strategy) + $1,495 (retainers)
-= **$4,995 month 1**. Above breakeven from day 1. Validates demand.
+If you hit week-4 numbers: $297 (3 packs) + $1,500 (audits) + $2,000 (strategy) +
+$1,495 (retainers) = **$5,292 month 1**. Above breakeven from day 1. Validates demand.
 
 If you DON'T hit it: the pitch is wrong, not the tool. Iterate on positioning
 before building more features.
+
+### Why the $99 pack first
+
+- **Pack tests WTP at the lowest-friction price.** If nobody buys at $99,
+  your $500 audit will not sell either — fix product or pitch BEFORE wasting
+  outreach hours.
+- **Pack is the ad for the audit.** Every buyer of the pack is a warm lead
+  for the audit. Include a footer in the pack: "Want this customized for
+  your handle? $500 audit." Pack -> audit conversion target: 10%.
+- **Pack scales without your time.** Once it's on Gumroad, it sells while
+  you sleep. Audits and retainers consume your hours.
 
 ## Pricing psychology
 
@@ -63,10 +75,33 @@ before building more features.
 
 - **White-label** for agencies → $299/mo unlocks unlimited client reports under
   their brand. Margin near 100%.
-- **Vertical packs** — pre-built playbooks per niche (crypto, longevity, B2B
-  SaaS) at $99 one-time. Scales without you.
-- **Affiliate** — pay creators 30% recurring for SaaS referrals. They'll do
-  the marketing for you because the product makes them look smart.
+- **Vertical packs** — pre-built playbooks per niche (crypto trading shipped;
+  add longevity / B2B SaaS / home automation / AI engineering / personal
+  finance as content swaps using `core/vertical_pack.py`). Scales without
+  your time. $99 each, $49 quarterly refresh, $299 5-niche bundle.
+- **Affiliate** — pay creators 30% recurring for SaaS referrals AND 50%
+  per pack sale (since pack margin is ~98%). They market because the product
+  makes them look smart AND pays them.
+
+## Vertical pack distribution
+
+The crypto_trading pack ships first because the author has domain expertise.
+Sequence for the next 4 packs (priority order):
+
+1. **AI engineering** — fast-moving, creators desperate for differentiation,
+   willingness-to-pay is highest. Same content authoring effort, larger TAM.
+2. **Indie SaaS** — Lenny + Tom Tunguz audience, already pays for content
+   newsletters; pack format is familiar.
+3. **Longevity** — high-WTP audience (Peter Attia / Bryan Johnson followers),
+   smaller TAM but premium pricing tolerance.
+4. **Personal finance** — largest TAM but lowest per-buyer WTP; expect
+   higher refund-attempt rate.
+5. **Home automation** — niche; only do this if a prospect specifically
+   asks. Low priority.
+
+To author a new pack: copy `data/crypto_trading_pack.py` -> `data/<niche>_pack.py`,
+edit content, register in `ui/app.py` `VERTICAL_PACKS` dict. The generator
+handles everything else.
 
 ## Honest failure modes (tell prospects up front; builds trust)
 

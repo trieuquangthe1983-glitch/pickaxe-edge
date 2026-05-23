@@ -35,6 +35,14 @@ from data.youtube_source import (
     replace_youtube_signals,
 )
 from data.sources import get_signals, list_niches
+from core.vertical_pack import build_pack, render_pack_markdown
+from data.crypto_trading_pack import CRYPTO_TRADING_CONTENT
+
+
+# Registry: niche -> NicheContent. Add packs by importing + registering here.
+VERTICAL_PACKS = {
+    "crypto_trading": CRYPTO_TRADING_CONTENT,
+}
 
 
 def _resolve_youtube_key() -> str:
@@ -149,9 +157,9 @@ def _signals_for(
     return sigs
 
 
-tab_niche, tab_arb, tab_edge, tab_pricing, tab_report = st.tabs([
+tab_niche, tab_arb, tab_edge, tab_pricing, tab_report, tab_pack = st.tabs([
     "1. Niche scan", "2. Arbitrage opportunities", "3. Edge audit",
-    "4. Quote builder", "5. Client report",
+    "4. Quote builder", "5. Client report", "6. Vertical packs ($99)",
 ])
 
 
@@ -344,3 +352,55 @@ with tab_report:
         mime="text/markdown",
     )
     st.markdown(md)
+
+
+# ---------------- TAB 6: VERTICAL PACKS ----------------
+with tab_pack:
+    st.subheader("Vertical pack — $99 productized info product")
+    st.caption(
+        "Self-serve, instant-download playbook for one niche. Combines curated "
+        "evergreen content (hooks, format adaptations, topic taxonomy) with a fresh "
+        "live arbitrage snapshot. Buyer gets a 2500+ word Markdown deliverable."
+    )
+
+    if not VERTICAL_PACKS:
+        st.warning("No vertical packs registered yet.")
+    else:
+        pack_niche = st.selectbox(
+            "Niche", sorted(VERTICAL_PACKS.keys()), key="pack_niche_select",
+        )
+        content = VERTICAL_PACKS[pack_niche]
+        col1, col2 = st.columns([2, 1])
+        with col1:
+            st.markdown(f"**{content.title}**")
+            st.caption(content.subtitle)
+        with col2:
+            validity = st.number_input("Validity (days)", 7, 90, 30)
+
+        if st.button("Generate pack", type="primary"):
+            pack_signals = _signals_for(
+                pack_niche,
+                use_live_reddit, reddit_time_filter,
+                use_live_substack, substack_days,
+                use_live_youtube, youtube_days,
+            )
+            pack = build_pack(
+                content, pack_signals,
+                validity_days=int(validity),
+            )
+            pack_md = render_pack_markdown(pack)
+            wc = len(pack_md.split())
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Word count", f"{wc:,}")
+            m2.metric("Opportunities", len(pack.arbitrage_opportunities))
+            m3.metric("Valid through", pack.valid_through.isoformat())
+
+            st.download_button(
+                "Download pack (Markdown)",
+                pack_md,
+                file_name=f"pickaxe-pack-{pack_niche}-{pack.generated_on.isoformat()}.md",
+                mime="text/markdown",
+                type="primary",
+            )
+            with st.expander("Preview the pack inline"):
+                st.markdown(pack_md)
