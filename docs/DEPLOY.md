@@ -164,3 +164,50 @@ YouTube free tier = 10,000 units/day.
 
 Hitting quota returns `quotaExceeded` -> UI gracefully falls back to mock data
 with a warning. Quota resets at midnight Pacific Time.
+
+## Pack refresh secret setup
+
+The `/Pack_Refresh` page (for paying buyers to re-generate their Vertical Pack)
+needs `PACK_REFRESH_SECRET` set BOTH locally (to issue tokens via
+`scripts/issue_token.py`) AND in the deployed environment (to verify tokens).
+
+### Generate a strong secret (do this ONCE, save it)
+```powershell
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+### Set it locally (for issuing tokens after Gumroad sales)
+```powershell
+# Save in your PowerShell profile so it persists across sessions:
+notepad $PROFILE
+# Add this line, save:
+$env:PACK_REFRESH_SECRET = "the-secret-you-just-generated"
+```
+
+### Set it on Streamlit Cloud (so the refresh page can verify)
+1. App dashboard -> Settings -> Secrets
+2. Add to the existing TOML content:
+```toml
+YOUTUBE_API_KEY = "AIzaSy..."
+PACK_REFRESH_SECRET = "the-same-secret-you-just-generated"
+```
+3. Save. App restarts.
+
+### Important: secret hygiene
+
+- **The secret MUST be identical between your local machine and the deployed
+  app** — otherwise tokens you issue won't verify.
+- **Never commit the secret to git.** It belongs in `.streamlit/secrets.toml`
+  (gitignored) locally, env var, or platform secret store.
+- **Rotate the secret** if you suspect leak by:
+  1. Generate a new secret
+  2. Update Streamlit Cloud secrets AND your local env
+  3. Re-issue tokens for all customers with active subscriptions
+  Old tokens become invalid the moment you change the secret.
+
+### Issuing tokens (after each Gumroad/Stripe sale)
+
+```powershell
+python scripts/issue_token.py buyer@example.com crypto_trading
+# Copy the printed block into the Gumroad receipt / customer email
+```

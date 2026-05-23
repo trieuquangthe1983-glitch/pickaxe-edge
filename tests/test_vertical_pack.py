@@ -1,47 +1,53 @@
-"""Vertical pack generator + crypto_trading content tests."""
+"""Vertical pack generator + niche-content tests (crypto + ai_engineering)."""
 
+import pytest
 from datetime import date
 
 from core.types import PLATFORMS
 from core.vertical_pack import build_pack, render_pack_markdown
 from data.crypto_trading_pack import CRYPTO_TRADING_CONTENT
+from data.ai_engineering_pack import AI_ENGINEERING_CONTENT
 from data.sources import get_signals
 
 
 SEED_DATE = date(2026, 5, 23)
 
+# Run the structural tests against every shipped pack
+ALL_PACKS = [CRYPTO_TRADING_CONTENT, AI_ENGINEERING_CONTENT]
 
-def test_crypto_content_has_hooks_for_all_six_platforms():
+
+@pytest.mark.parametrize("content", ALL_PACKS, ids=lambda c: c.niche)
+def test_pack_has_hooks_for_all_six_platforms(content):
     for plat in PLATFORMS:
-        assert plat in CRYPTO_TRADING_CONTENT.platform_hooks, (
-            f"missing hooks for {plat}"
-        )
-        assert CRYPTO_TRADING_CONTENT.platform_hooks[plat], (
-            f"empty hooks for {plat}"
-        )
+        assert plat in content.platform_hooks, f"{content.niche}: missing hooks for {plat}"
+        assert content.platform_hooks[plat], f"{content.niche}: empty hooks for {plat}"
 
 
-def test_crypto_content_has_anti_hooks_for_all_six_platforms():
+@pytest.mark.parametrize("content", ALL_PACKS, ids=lambda c: c.niche)
+def test_pack_has_anti_hooks_for_all_six_platforms(content):
     for plat in PLATFORMS:
-        assert plat in CRYPTO_TRADING_CONTENT.platform_anti_hooks, (
-            f"missing anti-hooks for {plat}"
+        assert plat in content.platform_anti_hooks, (
+            f"{content.niche}: missing anti-hooks for {plat}"
         )
 
 
-def test_crypto_content_has_minimum_20_edge_audit_questions():
-    """The edge audit is a buyer-facing checklist; 20 is the contract."""
-    assert len(CRYPTO_TRADING_CONTENT.edge_audit_questions) == 20
+@pytest.mark.parametrize("content", ALL_PACKS, ids=lambda c: c.niche)
+def test_pack_has_exactly_20_edge_audit_questions(content):
+    assert len(content.edge_audit_questions) == 20, (
+        f"{content.niche}: edge audit has {len(content.edge_audit_questions)} questions, need exactly 20"
+    )
 
 
-def test_crypto_content_has_at_least_5_hot_dead_emerging_each():
-    assert len(CRYPTO_TRADING_CONTENT.hot_topics) >= 5
-    assert len(CRYPTO_TRADING_CONTENT.dead_topics) >= 5
-    assert len(CRYPTO_TRADING_CONTENT.emerging_topics) >= 5
+@pytest.mark.parametrize("content", ALL_PACKS, ids=lambda c: c.niche)
+def test_pack_has_at_least_5_hot_dead_emerging_each(content):
+    assert len(content.hot_topics) >= 5
+    assert len(content.dead_topics) >= 5
+    assert len(content.emerging_topics) >= 5
 
 
-def test_crypto_content_has_failure_modes():
-    """Honest failure modes are non-negotiable for trust — buyer expects this."""
-    assert len(CRYPTO_TRADING_CONTENT.failure_modes) >= 5
+@pytest.mark.parametrize("content", ALL_PACKS, ids=lambda c: c.niche)
+def test_pack_has_failure_modes(content):
+    assert len(content.failure_modes) >= 5
 
 
 def test_build_pack_returns_correct_validity_window():
@@ -95,28 +101,30 @@ def test_render_pack_lists_at_least_one_opportunity():
     assert len(pack.arbitrage_opportunities) > 0
 
 
-def test_pack_total_word_count_above_minimum_for_99_usd_product():
+@pytest.mark.parametrize("content", ALL_PACKS, ids=lambda c: c.niche)
+def test_pack_total_word_count_above_minimum_for_99_usd_product(content):
     """Buyer-quality threshold: a $99 pack must feel substantial. Aim 2500+ words."""
-    sigs = get_signals("crypto_trading")
-    pack = build_pack(CRYPTO_TRADING_CONTENT, sigs, now=SEED_DATE)
+    sigs = get_signals(content.niche)
+    pack = build_pack(content, sigs, now=SEED_DATE)
     md = render_pack_markdown(pack)
     words = len(md.split())
-    assert words >= 2500, f"pack is only {words} words — too thin for $99"
+    assert words >= 2500, f"{content.niche} pack is only {words} words — too thin for $99"
 
 
-def test_no_youtube_link_or_external_url_in_pack_body():
+@pytest.mark.parametrize("content", ALL_PACKS, ids=lambda c: c.niche)
+def test_no_external_urls_in_pack_body(content):
     """The pack should NOT contain external URLs that could rot or look spammy."""
-    sigs = get_signals("crypto_trading")
-    pack = build_pack(CRYPTO_TRADING_CONTENT, sigs, now=SEED_DATE)
+    sigs = get_signals(content.niche)
+    pack = build_pack(content, sigs, now=SEED_DATE)
     md = render_pack_markdown(pack)
-    # The pack is content-pure — no external promotional links
-    assert "https://" not in md, "external URLs should not appear in pack body"
+    assert "https://" not in md, f"{content.niche}: external URLs should not appear"
 
 
-def test_edge_audit_questions_are_yes_no_phrased():
+@pytest.mark.parametrize("content", ALL_PACKS, ids=lambda c: c.niche)
+def test_edge_audit_questions_are_yes_no_phrased(content):
     """All 20 questions should be answerable yes/no — they're a checklist."""
-    for q in CRYPTO_TRADING_CONTENT.edge_audit_questions:
+    for q in content.edge_audit_questions:
         first_word = q.split()[0].lower()
-        assert first_word in {"can", "do", "have", "is", "are", "does"}, (
-            f"question '{q[:60]}...' doesn't start with a yes/no verb"
+        assert first_word in {"can", "do", "does", "has", "have", "is", "are", "was", "were"}, (
+            f"{content.niche}: question '{q[:60]}...' doesn't start with a yes/no verb"
         )
