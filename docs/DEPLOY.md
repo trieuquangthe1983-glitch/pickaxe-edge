@@ -211,3 +211,75 @@ PACK_REFRESH_SECRET = "the-same-secret-you-just-generated"
 python scripts/issue_token.py buyer@example.com crypto_trading
 # Copy the printed block into the Gumroad receipt / customer email
 ```
+
+## Gumroad webhook (auto-issue tokens) — separate FastAPI service
+
+The webhook handler in `webhook_server/` is a **separate process** from the
+Streamlit app. Streamlit can't accept webhooks (no POST endpoints exposed).
+Three deploy paths, in order of recommendation:
+
+### Path A: Render.com (recommended — paid plan, always-on, simplest)
+
+```powershell
+# 1) Push the repo to GitHub if you haven't already (see NEXT_STEPS.md)
+# 2) Visit https://render.com -> New + -> Web Service
+#    - Connect your GitHub repo
+#    - Runtime: Python
+#    - Build command:  pip install -r requirements-webhook.txt
+#    - Start command:  uvicorn webhook_server.main:app --host 0.0.0.0 --port $PORT
+#    - Plan: Starter ($7/mo) -- needed for always-on; free tier sleeps
+# 3) Set environment variables in Render dashboard:
+#       GUMROAD_WEBHOOK_SECRET  = <long random string>
+#       PACK_REFRESH_SECRET     = <same value as your Streamlit deploy>
+#       GUMROAD_SELLER_ID       = <your Gumroad seller_id from dashboard>
+#       APP_URL                 = https://your-streamlit.streamlit.app
+#       EMAIL_PROVIDER          = resend
+#       RESEND_API_KEY          = re_xxx (from https://resend.com)
+#       RESEND_FROM_EMAIL       = packs@yourdomain.com (must be verified in Resend)
+# 4) Deploy. Note the URL (e.g. https://pickaxe-webhook.onrender.com)
+# 5) Gumroad: Settings -> Advanced -> Ping URL:
+#       https://pickaxe-webhook.onrender.com/webhooks/gumroad?key=<your-GUMROAD_WEBHOOK_SECRET>
+```
+
+### Path B: Fly.io (free tier eligible)
+
+```powershell
+# Requires flyctl: https://fly.io/docs/hands-on/install-flyctl/
+cd webhook_server
+fly launch --copy-config --no-deploy   # answer prompts
+# Edit fly.toml: change ports to 8080, set entrypoint to uvicorn command
+fly secrets set GUMROAD_WEBHOOK_SECRET=... PACK_REFRESH_SECRET=... (etc)
+fly deploy
+```
+
+### Path C: Skip the webhook, keep using CLI
+
+If you sell < 10 packs/week, the manual CLI workflow (`scripts/issue_token.py`)
+is honestly fine. The webhook adds infrastructure (one extra service, one
+extra secret to rotate). Wait until manual issuance becomes painful, then
+ship the webhook.
+
+### Local testing the webhook before deploying
+
+```powershell
+$env:GUMROAD_WEBHOOK_SECRET = "test-secret"
+$env:PACK_REFRESH_SECRET    = "test-pack-secret"
+$env:EMAIL_PROVIDER         = "console"   # prints email to stdout
+pip install -r requirements-webhook.txt
+uvicorn webhook_server.main:app --reload --port 8000
+
+# In another terminal:
+curl -X POST "http://localhost:8000/webhooks/gumroad?key=test-secret" `
+  -d "email=test@example.com&permalink=pickaxe-crypto&seller_id=test"
+# Expect: {"ok":true, ...} and an email printed to the uvicorn stdout
+```
+
+### Resend email setup (if using Path A or B with real emails)
+
+1. Sign up at https://resend.com (free tier = 100 emails/day, 3,000/month)
+2. Verify your sending domain (DNS records, ~10 minutes)
+3. Create an API key: Dashboard -> API Keys -> Create API Key
+4. Set in your webhook service's env:
+   - `EMAIL_PROVIDER=resend`
+   - `RESEND_API_KEY=re_xxxxxxxxxxxx`
+   - `RESEND_FROM_EMAIL=packs@yourdomain.com`

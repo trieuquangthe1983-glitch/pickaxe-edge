@@ -38,12 +38,14 @@ from data.sources import get_signals, list_niches
 from core.vertical_pack import build_pack, render_pack_markdown
 from data.crypto_trading_pack import CRYPTO_TRADING_CONTENT
 from data.ai_engineering_pack import AI_ENGINEERING_CONTENT
+from data.indie_saas_pack import INDIE_SAAS_CONTENT
 
 
 # Registry: niche -> NicheContent. Add packs by importing + registering here.
 VERTICAL_PACKS = {
     "crypto_trading": CRYPTO_TRADING_CONTENT,
     "ai_engineering": AI_ENGINEERING_CONTENT,
+    "indie_saas":     INDIE_SAAS_CONTENT,
 }
 
 

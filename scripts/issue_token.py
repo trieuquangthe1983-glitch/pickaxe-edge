@@ -26,7 +26,7 @@ if str(ROOT) not in sys.path:
 from core.refresh_token import generate_token  # noqa: E402
 
 
-SUPPORTED_NICHES = ("crypto_trading", "ai_engineering")
+SUPPORTED_NICHES = ("crypto_trading", "ai_engineering", "indie_saas")
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -4,6 +4,8 @@ __pycache__/
 .pytest_cache/
 .streamlit_out.log
 .streamlit_err.log
+.webhook_out.log
+.webhook_err.log
 .env
 .DS_Store
 *.egg-info/

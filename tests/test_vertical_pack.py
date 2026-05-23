@@ -7,13 +7,14 @@ from core.types import PLATFORMS
 from core.vertical_pack import build_pack, render_pack_markdown
 from data.crypto_trading_pack import CRYPTO_TRADING_CONTENT
 from data.ai_engineering_pack import AI_ENGINEERING_CONTENT
+from data.indie_saas_pack import INDIE_SAAS_CONTENT
 from data.sources import get_signals
 
 
 SEED_DATE = date(2026, 5, 23)
 
 # Run the structural tests against every shipped pack
-ALL_PACKS = [CRYPTO_TRADING_CONTENT, AI_ENGINEERING_CONTENT]
+ALL_PACKS = [CRYPTO_TRADING_CONTENT, AI_ENGINEERING_CONTENT, INDIE_SAAS_CONTENT]
 
 
 @pytest.mark.parametrize("content", ALL_PACKS, ids=lambda c: c.niche)
