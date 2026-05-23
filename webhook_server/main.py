@@ -14,6 +14,7 @@ Deploy paths (see docs/DEPLOY.md):
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 from pathlib import Path
@@ -26,8 +27,31 @@ if str(ROOT) not in sys.path:
 from fastapi import FastAPI, Query, Request
 from fastapi.responses import JSONResponse
 
-from core.webhook import handle_gumroad_ping
+from core.webhook import DEFAULT_PRODUCT_TO_NICHE, handle_gumroad_ping
 from webhook_server.email_provider import get_sender_from_env
+
+
+def _resolve_product_map() -> dict[str, str]:
+    """Read PRODUCT_TO_NICHE_JSON env var if set, else fall back to default.
+
+    Example env value:
+      {"my-crypto-pack-slug": "crypto_trading", "ai-pack-slug": "ai_engineering"}
+    """
+    raw = os.environ.get("PRODUCT_TO_NICHE_JSON", "").strip()
+    if not raw:
+        return DEFAULT_PRODUCT_TO_NICHE
+    try:
+        parsed = json.loads(raw)
+        if not isinstance(parsed, dict):
+            raise ValueError("must be a JSON object")
+        return {str(k): str(v) for k, v in parsed.items()}
+    except Exception as e:
+        print(
+            f"WARNING: PRODUCT_TO_NICHE_JSON set but invalid ({e}). "
+            f"Falling back to DEFAULT_PRODUCT_TO_NICHE.",
+            file=sys.stderr,
+        )
+        return DEFAULT_PRODUCT_TO_NICHE
 
 
 app = FastAPI(
@@ -50,11 +74,14 @@ def root() -> dict:
 def health() -> dict:
     pack_ok = bool(os.environ.get("PACK_REFRESH_SECRET"))
     hook_ok = bool(os.environ.get("GUMROAD_WEBHOOK_SECRET"))
+    product_map = _resolve_product_map()
     return {
         "ok": pack_ok and hook_ok,
         "pack_refresh_secret_set": pack_ok,
         "gumroad_webhook_secret_set": hook_ok,
         "email_provider": os.environ.get("EMAIL_PROVIDER", "console"),
+        "product_to_niche": product_map,
+        "configured_via_env": bool(os.environ.get("PRODUCT_TO_NICHE_JSON")),
     }
 
 
@@ -75,6 +102,7 @@ async def gumroad_ping(
         expected_seller_id=os.environ.get("GUMROAD_SELLER_ID") or None,
         email_sender=get_sender_from_env(),
         app_url=os.environ.get("APP_URL", "https://YOUR-APP.streamlit.app"),
+        product_to_niche=_resolve_product_map(),
         token_valid_days=int(os.environ.get("TOKEN_VALID_DAYS", "90")),
     )
 
