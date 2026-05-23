@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.streamlit_out.log
+.streamlit_err.log
+.git/
+.gitignore
+docs/
+tests/

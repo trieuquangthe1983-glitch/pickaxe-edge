@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.streamlit_out.log
+.streamlit_err.log
+.env
+.DS_Store
+*.egg-info/
+build/
+dist/
+
+# Secrets — NEVER commit these
+.streamlit/secrets.toml
