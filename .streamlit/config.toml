@@ -1,13 +1,17 @@
-# Project-local Streamlit config.
-# Port allocations across user's Streamlit projects:
-#   8501 = audience-edge
+# Project Streamlit config.
+#
+# NOTE: do NOT pin server.port here. Streamlit Community Cloud always
+# health-checks on port 8501 and ignores --server.port flags it didn't
+# itself set. Pinning a port in this committed config breaks Cloud deploys.
+#
+# Local-only port assignment (to avoid clash with audience-edge on 8501):
+# launch via `./start-local.ps1` which sets --server.port=8503 explicitly.
+# Port map across user's Streamlit projects:
+#   8501 = audience-edge      (default)
 #   8502 = faceless-infra
-#   8503 = pickaxe-edge  (this project)
-# Note: Streamlit Cloud / Render / Fly override port via $PORT — this only
-# affects local `streamlit run`.
+#   8503 = pickaxe-edge       (this project, when launched via start-local.ps1)
 
 [server]
-port = 8503
 headless = true
 runOnSave = false
 fileWatcherType = "none"

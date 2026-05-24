@@ -34,10 +34,15 @@ See [docs/SALES_PLAYBOOK.md](docs/SALES_PLAYBOOK.md) for go-to-market.
 
 ```powershell
 cd C:\Users\Administrator\pickaxe-edge
-pip install -r requirements.txt
-python -m pytest tests/ -v
-streamlit run ui/app.py
+pip install -r requirements-dev.txt    # includes pytest + production deps
+python -m pytest tests/ -v             # 149 tests pass
+./start-local.ps1                       # launches on http://localhost:8503
 ```
+
+Why `start-local.ps1` and not bare `streamlit run`: this user's machine runs
+multiple Streamlit projects, and audience-edge owns the default port 8501.
+The helper script pins this project to 8503. Streamlit Cloud / Render / Fly
+use their own port (set via `$PORT`) and do NOT use the helper script.
 
 ## Architecture
 
