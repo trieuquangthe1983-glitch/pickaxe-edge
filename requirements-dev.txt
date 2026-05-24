@@ -1,0 +1,5 @@
+# Dev-only deps for running tests locally.
+# Installed alongside requirements.txt during development; NOT shipped to
+# Streamlit Cloud / Render / Docker.
+-r requirements.txt
+pytest>=8.0,<10.0

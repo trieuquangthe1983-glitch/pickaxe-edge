@@ -1,3 +1,5 @@
-streamlit==1.35.0
-pandas==2.2.2
-pytest==9.0.3
+# Production runtime deps only.
+# Loose pins so Streamlit Cloud can pick the best wheel for its Python.
+# Local dev / test deps: see requirements-dev.txt
+streamlit>=1.35,<2.0
+pandas>=2.0,<3.0
