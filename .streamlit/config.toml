@@ -1,4 +1,13 @@
+# Project-local Streamlit config.
+# Port allocations across user's Streamlit projects:
+#   8501 = audience-edge
+#   8502 = faceless-infra
+#   8503 = pickaxe-edge  (this project)
+# Note: Streamlit Cloud / Render / Fly override port via $PORT — this only
+# affects local `streamlit run`.
+
 [server]
+port = 8503
 headless = true
 runOnSave = false
 fileWatcherType = "none"

@@ -82,8 +82,10 @@ railway domain   # get public URL
 ### Local Docker (sanity test before remote deploy)
 ```powershell
 docker build -t pickaxe-edge .
-docker run -p 8501:8501 pickaxe-edge
-# Open http://localhost:8501
+docker run -p 8503:8503 pickaxe-edge
+# Open http://localhost:8503
+# (Port 8503 is reserved for pickaxe-edge across this user's projects;
+#  8501 = audience-edge, 8502 = faceless-infra.)
 ```
 
 ## Pre-deploy checklist
